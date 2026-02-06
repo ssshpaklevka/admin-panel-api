@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  basePath: '/player-media-admin',
   typescript: {
     ignoreBuildErrors: true,
   },
