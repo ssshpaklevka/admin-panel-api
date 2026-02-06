@@ -1,10 +1,10 @@
 module.exports = {
     apps: [{
       name: 'media-player',
-      script: 'bun',
+      script: 'npm',
       args: 'run start --port 3004',
-      interpreter: '/home/front/.nvm/versions/node/v20.11.0/bin/node', // ОБНОВИТЬ НА СЕРВЕРЕ
-      cwd: '/home/front/path/to/your/project', // ОБНОВИТЬ НА СЕРВЕРЕ - путь к проекту
+      interpreter: '/home/front/.nvm/versions/node/v20.20.0/bin/node',
+      cwd: '/home/front/media-player', // ОБНОВИТЬ НА СЕРВЕРЕ - путь к проекту
       env: {
         NODE_ENV: 'production',
         PORT: 3004
