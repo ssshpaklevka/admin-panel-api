@@ -83,6 +83,17 @@ export default function DevicesPage() {
     fetchGroups();
   }, []);
 
+  // Сброс формы при закрытии диалога
+  useEffect(() => {
+    if (!dialogOpen) {
+      // Небольшая задержка, чтобы анимация закрытия завершилась
+      setTimeout(() => {
+        setFormData({ macAddress: "", ip: "", name: "", location: "", groupId: "" });
+        setEditingId(null);
+      }, 200);
+    }
+  }, [dialogOpen]);
+
   const handleSave = async () => {
     if (
       !formData.macAddress ||
@@ -111,9 +122,15 @@ export default function DevicesPage() {
         location: formData.location,
       };
 
-      // Добавляем groupId только если выбрана группа
-      if (formData.groupId) {
-        requestBody.groupId = formData.groupId;
+      // Добавляем groupId (даже если пустой, чтобы можно было удалить группу)
+      if (editingId) {
+        // При редактировании всегда отправляем groupId
+        requestBody.groupId = formData.groupId || null;
+      } else {
+        // При создании отправляем только если выбрана
+        if (formData.groupId) {
+          requestBody.groupId = formData.groupId;
+        }
       }
 
       const response = await fetch(url, {
@@ -189,12 +206,13 @@ export default function DevicesPage() {
   };
 
   const handleEdit = (device: Device) => {
+    console.log("Editing device:", device); // для отладки
     setFormData({
       macAddress: device.macAddress,
       ip: device.ip,
       name: device.name || "",
       location: device.location || "",
-      groupId: device.groups.length > 0 ? device.groups[0].id : "",
+      groupId: device.groups && device.groups.length > 0 ? device.groups[0].id : "",
     });
     setEditingId(device.id);
     setDialogOpen(true);
@@ -302,10 +320,14 @@ export default function DevicesPage() {
                 </label>
                 <select
                   value={formData.groupId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, groupId: e.target.value })
-                  }
-                  className="w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground"
+                  onChange={(e) => {
+                    console.log("Group selected:", e.target.value); // для отладки
+                    setFormData({ ...formData, groupId: e.target.value });
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground cursor-pointer"
                 >
                   <option value="">Выберите группу...</option>
                   {groups.map((group) => (
@@ -372,7 +394,11 @@ export default function DevicesPage() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={() => handleEdit(device)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Edit button clicked for device:", device.id);
+                      handleEdit(device);
+                    }}
                     className="text-foreground hover:bg-primary/20"
                   >
                     <Edit2 size={18} />
